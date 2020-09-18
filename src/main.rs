@@ -2,10 +2,10 @@ use structopt::StructOpt;
 use std::io::BufReader;
 use std::fs::File;
 use std::io::prelude::*;
-use std::io::{self, Write};
-use log::{info, warn, trace};
-
+use std::io;
+use log::trace;
 use raingrep::pattern;
+
 
 /// Search for a pattern in a file and display the line that contain it. 
 #[derive(Debug, StructOpt)]
@@ -33,14 +33,14 @@ fn main() -> Result<(), CustomError> {
         .map_err(|err| {
             CustomError(format!("Error reading `{:?}` : {}", &args.path, err))
         })?;
+    
     trace!("{:?}", f);
 
     let mut reader = BufReader::with_capacity(10 , f);
+    
     trace!("{:?}", reader);
 
     let mut content = String::new();
-    
-    
     let len = reader.read_to_string(&mut content)
         .map_err(|err|  { 
             CustomError(format!("Error reading : `{:?}` : {}", &args.path, err))
@@ -50,8 +50,11 @@ fn main() -> Result<(), CustomError> {
     let stdout = io::stdout();
     let mut handle = io::BufWriter::new(stdout.lock());
     trace!("{:?}", handle);
-    
-    pattern::find_matches(content.as_str(), &args.pattern, &mut handle);  
+
+    pattern::find_matches(content.as_str(), &args.pattern, &mut handle)
+        .map_err(|error| {
+            CustomError(format!("Error can't find : {} ", error))
+        })?;
 
     Ok(())
 }

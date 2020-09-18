@@ -5,9 +5,11 @@ use std::io::Write;
 pub fn find_matches(content: &str, pattern: &str, mut writer : impl Write) -> Result<(), std::io::Error>{
     for (_line_no, line) in content.lines().enumerate() {
         if line.contains(pattern){
+            // writeln!(writer, "{} : {}", _line_no, line)?;
             writeln!(writer, "{}", line)?;
         }
     }
+
     Ok(())
 }
 
